@@ -21,7 +21,7 @@ const TOKENS: { [key: string]: string[] } = {
 };
 
 export const BalanceDisplay = () => {
-  const { currentNetwork, balance } = useProvider();
+  const { currentNetwork, balance, isConnected } = useProvider();
   const [tokensFromNetwork, setTokensFromNetwork] = useState<string[] | []>([]);
 
   useEffect(() => {
@@ -34,13 +34,13 @@ export const BalanceDisplay = () => {
 
   return (
     <div>
-      <div>{Number(balance).toFixed(4)}</div>
-      {!tokensFromNetwork.length &&
-        tokensFromNetwork.map((token, i) => (
-          <div key={i}>
-            <Balance token={token} />
-          </div>
-        ))}
+      <h3>Balances:</h3>
+      {isConnected && <div>{Number(balance).toFixed(4)}</div>}
+      {tokensFromNetwork.map((token, i) => (
+        <div key={i}>
+          <Balance token={token} />
+        </div>
+      ))}
     </div>
   );
 };

@@ -15,6 +15,7 @@ type ProviderContextType = {
   connectWallet: () => void;
   account: JsonRpcSigner;
   balance: string;
+  isConnected: boolean;
 };
 
 export const ProviderContext = createContext({} as ProviderContextType);
@@ -28,7 +29,7 @@ export const ProviderContextProvider: FC<PropsWithChildren> = ({
   const { currentNetwork } = useWatchNetwork();
   const [account, setAccount] = useState({} as JsonRpcSigner);
   const [balance, setBalance] = useState("");
-  // const [isSigner, setIsSigner] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   const connectProvider = () => {
     if (window.ethereum) {
@@ -50,6 +51,7 @@ export const ProviderContextProvider: FC<PropsWithChildren> = ({
       const formatBalance = formatEther(respBalance);
       setBalance(formatBalance);
       setAccount(acc);
+      setIsConnected(true);
     } catch (err: unknown) {
       console.error(err);
     }
@@ -89,7 +91,8 @@ export const ProviderContextProvider: FC<PropsWithChildren> = ({
         currentNetwork,
         connectWallet,
         account,
-        balance
+        balance,
+        isConnected
       }}
     >
       {children}
