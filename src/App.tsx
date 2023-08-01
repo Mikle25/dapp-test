@@ -1,16 +1,19 @@
 import MetamaskConnection from "./ConnectWallet";
-import { useProvider } from "./store";
+import { useProvider } from "./hooks/useProvider";
 import { BalanceDisplay } from "./components/balance/BalanceDisplay";
+import { ProviderContextProvider } from "./store";
 
 const App = () => {
   const { currentNetwork } = useProvider();
 
   return (
-    <div>
-      <h1>Dapp network: {currentNetwork}</h1>
-      <MetamaskConnection />
-      <BalanceDisplay />
-    </div>
+    <>
+      <ProviderContextProvider>
+        <h1>Dapp network: {currentNetwork}</h1>
+        <MetamaskConnection />
+        <BalanceDisplay />
+      </ProviderContextProvider>
+    </>
   );
 };
 

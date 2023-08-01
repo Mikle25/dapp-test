@@ -1,42 +1,42 @@
 import {
   createContext,
   useCallback,
-  useContext,
   useEffect,
   useState,
-  FC
+  FC,
+  PropsWithChildren
 } from "react";
 import { ethers, BrowserProvider, JsonRpcSigner, formatEther } from "ethers";
 import { useWatchNetwork } from "../hooks/useWatchNetwork";
 
 type ProviderContextType = {
   provider: BrowserProvider;
-  connectProvider: () => Promise<BrowserProvider>;
   currentNetwork: string;
   connectWallet: () => void;
   account: JsonRpcSigner;
   balance: string;
 };
 
-const ProviderContext = createContext({
-  provider: null
-} as ProviderContextType);
+export const ProviderContext = createContext({} as ProviderContextType);
 
-export const ProviderContextProvider: FC = ({ children }) => {
+export const ProviderContextProvider: FC<PropsWithChildren> = ({
+  children
+}) => {
   const [provider, setProvider] = useState<BrowserProvider>(
     {} as BrowserProvider
   );
   const { currentNetwork } = useWatchNetwork();
   const [account, setAccount] = useState({} as JsonRpcSigner);
   const [balance, setBalance] = useState("");
+  // const [isSigner, setIsSigner] = useState(false);
 
-  const connectProvider = async () => {
+  const connectProvider = () => {
     if (window.ethereum) {
       try {
         const web3Provider = new ethers.BrowserProvider(window.ethereum);
         setProvider(web3Provider);
-        return web3Provider;
-      } catch (error) {
+        // return web3Provider;
+      } catch (error: unknown) {
         console.error("Error connecting to provider:", error);
       }
     } else {
@@ -50,36 +50,42 @@ export const ProviderContextProvider: FC = ({ children }) => {
       const formatBalance = formatEther(respBalance);
       setBalance(formatBalance);
       setAccount(acc);
-    } catch (err: Error) {
-      console.error(err.message);
+    } catch (err: unknown) {
+      console.error(err);
     }
   }, []);
 
   const connectWallet = async () => {
     try {
-      const acc = await connectProvider();
+      const acc = await provider;
       const sign = await acc.getSigner();
+      // const hasSigner = await acc?.hasSigner(sign.address);
+      // setIsSigner(Boolean(hasSigner));
       await updateWallet(sign);
-    } catch (e: Error) {
-      console.error(e.message);
+    } catch (e: unknown) {
+      console.error(e);
     }
   };
 
   useEffect(() => {
-    (async () => {
-      const hasSigner = await (await connectProvider()).hasSigner();
+    connectProvider();
+  }, [currentNetwork]);
 
-      if (hasSigner) {
+  useEffect(() => {
+    (async () => {
+      const isSigner = (await provider.listAccounts()).length;
+      if (isSigner) {
         await connectWallet();
       }
     })();
-  }, [currentNetwork]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentNetwork, provider]);
 
   return (
     <ProviderContext.Provider
       value={{
         provider,
-        connectProvider,
+        // connectProvider,
         currentNetwork,
         connectWallet,
         account,
@@ -89,16 +95,4 @@ export const ProviderContextProvider: FC = ({ children }) => {
       {children}
     </ProviderContext.Provider>
   );
-};
-
-export const useProvider = () => {
-  const context = useContext(ProviderContext);
-
-  if (!context) {
-    throw new Error(
-      "useProvider must be used within a ProviderContextProvider"
-    );
-  }
-
-  return context;
 };

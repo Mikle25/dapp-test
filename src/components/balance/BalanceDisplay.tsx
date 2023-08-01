@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { useProvider } from "../../store";
+import { useEffect, useState } from "react";
+import { useProvider } from "../../hooks/useProvider";
 import { Balance } from "./Balance";
 
-const TOKENS = {
+const TOKENS: { [key: string]: string[] } = {
   mainnet: [
     "0xdAC17F958D2ee523a2206206994597C13D831ec7",
     "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
@@ -22,24 +22,25 @@ const TOKENS = {
 
 export const BalanceDisplay = () => {
   const { currentNetwork, balance } = useProvider();
-  const [tokensFromNetwork, setTokensFromNetwork] = useState([]);
+  const [tokensFromNetwork, setTokensFromNetwork] = useState<string[] | []>([]);
 
   useEffect(() => {
-    if (TOKENS[currentNetwork.toLocaleLowerCase()] === undefined) {
+    if (TOKENS[currentNetwork?.toLocaleLowerCase()] === undefined) {
       setTokensFromNetwork([]);
     } else {
-      setTokensFromNetwork(TOKENS[currentNetwork.toLocaleLowerCase()]);
+      setTokensFromNetwork(TOKENS[currentNetwork?.toLocaleLowerCase()]);
     }
   }, [currentNetwork]);
 
   return (
     <div>
       <div>{Number(balance).toFixed(4)}</div>
-      {tokensFromNetwork.map((token, i) => (
-        <div key={i}>
-          <Balance token={token} />
-        </div>
-      ))}
+      {!tokensFromNetwork.length &&
+        tokensFromNetwork.map((token, i) => (
+          <div key={i}>
+            <Balance token={token} />
+          </div>
+        ))}
     </div>
   );
 };

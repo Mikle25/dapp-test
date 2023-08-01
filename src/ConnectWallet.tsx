@@ -1,4 +1,4 @@
-import { useProvider } from "./store";
+import { useProvider } from "./hooks/useProvider";
 
 const MetamaskConnection = () => {
   const { connectWallet, account } = useProvider();
